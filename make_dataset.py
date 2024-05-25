@@ -227,15 +227,17 @@ def update_language(current_language):
         return random.choice(languages)
 
 def generate_kr_lyrics_data(infile, trainfile, testfile):
-    df = pd.read_csv(infile, usecols=['title', 'lyric'])
+    df = pd.read_csv(infile, usecols=['title', 'lyric', 'year'])
+    df = df[df['year'] >= 2010]
 
     # shuffle data
     df = df.sample(frac=1).reset_index(drop=True)
     
     # train:test = 8:2
-    train_size = int(len(df) * 0.8)
+    train_size = int(len(df) * 0.4)
+    test_size = int(len(df) * 0.5)
     train_df = df[:train_size]
-    test_df = df[train_size:]
+    test_df = df[train_size:test_size]
 
     with open(trainfile, 'w', encoding='utf-8') as train_outfile, open(testfile, 'w', encoding='utf-8') as test_outfile:
         for index, row in train_df.iterrows():
