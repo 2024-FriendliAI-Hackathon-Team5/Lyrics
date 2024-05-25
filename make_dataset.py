@@ -272,45 +272,9 @@ def generate_kr_lyrics_data(infile, trainfile, testfile):
                     completed_lyric += line + '\n'
 
 generate_kr_lyrics_data(kr_file_path, 'train.jsonl', 'test.jsonl')
-ex_lyric = """정말 짜릿했어 어디선가
-내게 윙크한 까만 눈동자
-Boy, your beautiful eyes got me lost now, yeah, yeah
-깜짝 놀라게 하기는 해도
-자신만만한 너의 그 태도
-Liked you from the get go, cool함은 그대로, 부담감은 '제로'
-'Cause you know you're sparkling like a shooting star
-I can see us going far, 얼마나 상큼할까
-We will pop up all around the world (world) 마법 같은 걸 (걸)
-I'm ready, let's go (go), you already know (know, know, know)
-That I don't ever want us to be
-I don't ever want us to be, I don't ever want us to be apart (ye-yeah)
-I don't ever want us to be, I don't ever want us to be apart
-코-코-코-코-코-코 (코)
-코카콜라 맛있다, 코카콜라 맛있다
-See you looking, catch it, here's your Cola
-See you looking, catch it, here's your Cola
-코카콜라 맛있다, 코카콜라 맛있다
-See you looking, catch it, here's your Cola
-See you looking, catch it, here's your Cola
-사실 궁금했어 저기선가
-내 눈에 띄던 까만 네 글자
-Boy, your stylish glow up got me hooked now, yeah, yeah
-살짝 짓궂게 보이긴 해도
-완전 달달한 너의 그 애교
-Liked you from the get go, sweet함은 그대로, 불안감은 '제로'
-'Cause you know you're sparkling like a shooting star
-I can see us going far, 얼마나 상큼할까
-We will pop up all around the world (world) 마법 같은 걸 (걸)
-I'm ready, let's go (go), you already know (know, know, know)
-That I don't ever want us to be
-I don't ever want us to be, I don't ever want us to be apart (ye-yeah)
-I don't ever want us to be, I don't ever want us to be apart
-코-코-코-코-코-코 (코)
-코카콜라 맛있다, 코카콜라 맛있다
-See you looking, catch it, here's your Cola
-See you looking, catch it, here's your Cola
-코카콜라 맛있다, 코카콜라 맛있다
-See you looking, catch it, here's your Cola
-See you looking, catch it, here's your Cola
+ex_lyric = """
+example
+hello
+world
 """
 #print(count_syllables(ex_lyric))
