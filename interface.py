@@ -1,11 +1,29 @@
 import gradio as gr
-from numpy import maximum, minimum
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.chat_models.friendli import ChatFriendli
+from korean_process import generate_korean_lyrics
+import os
 
+global selected_line_value
+selected_line_value = 0
+
+llm = ChatFriendli(
+    friendli_token = os.getenv("FRIENDLI_API_KEY"),
+    model = "meta-llama-3-70b-instruct",
+    streaming = False,
+    # temperature=0.5,
+    # max_tokens=100,
+    # top_p=0.9,
+    # frequency_penalty=0.0,
+    # stop=["\n"],
+)
 
 def process_english(title, lyric):
     return switch_interface(title, lyric)
 
 def process_korean(title, lyric):
+    lyric = generate_korean_lyrics(title, lyric)
     return switch_interface(title, lyric)
 
 def switch_interface(title, lyric):
@@ -38,7 +56,8 @@ def switch_interface(title, lyric):
 
 
 def update_selected_lyric(selected_line):
-    if 1 <= selected_line <= len(stored_lyrics):
+    selected_line_value = selected_line
+    if selected_line != 0:
         return gr.update(value=f"Selected line ({selected_line}): {stored_lyrics[selected_line-1]}")
     else:
         return gr.update(value="Choose a line you want to revise using the slider!")
@@ -58,7 +77,37 @@ def reset_interface():
             gr.update(visible=False), # feedback_btn
             gr.update(visible=False)) # new_btn
 
-# Gradio 인터페이스 설정
+def feedback(lyrics, line, feedback):
+    prompt = PromptTemplate.from_template("""Modify the target lyric to include the following feedback.
+                                          The sentence length must remain the same with the target line.
+                                          Answer with a single line of lyrics you created, and nothing else.
+                                          Whole Lyrics: {lyrics},
+                                          Target Lyric: {line},
+                                          Feedback: {feedback},
+                                          Your new lyric that modified the target line:""")
+    formatted_prompt = prompt.format(lyrics=lyrics, line=line, feedback=feedback)
+
+    feedback_chain = (
+        llm
+        | StrOutputParser()
+    )
+
+    result = feedback_chain.invoke(formatted_prompt)
+    return result
+
+def apply_feedback(lyrics_input, selected_lyric, feedback_text):
+    if (selected_line_value == 0):
+        return (gr.update(), gr.update(), gr.update(value="Choose a line you want to revise using the slider!"))
+    modified_lyric = feedback(lyrics_input, selected_lyric, feedback_text)
+    stored_lyrics[selected_line_value-1] = modified_lyric
+    numbered_lyric = ""
+    for lyric in stored_lyrics:
+        numbered_lyric += f"{lyric}\n"
+
+    return (gr.update(value=f"<p style='white-space: pre-wrap;'>{numbered_lyric}</p>"), 
+                gr.update(value=0),
+                gr.update(value=f"Feedback applied! Selected line ({selected_line}): {modified_lyric}"))
+
 with gr.Blocks() as demo:
     with gr.Row():
         audio_input1 = gr.Audio(label="Original Audio", visible=True)
@@ -94,6 +143,12 @@ with gr.Blocks() as demo:
         update_selected_lyric, 
         [selected_line], 
         [selected_lyric]
+    )
+
+    feedback_btn.click(
+        apply_feedback, 
+        [lyrics_input, selected_lyric, feedback_text], 
+        [hidden_lyric, selected_line, selected_lyric]
     )
 
     new_btn.click(

@@ -12,87 +12,21 @@ en_test_output_file = 'kr_test.jsonl'
 en_file_path = 'spotify_millsongdata.csv'
 kr_file_path = 'kr_lyrics_data.csv'
 
-frame_prompt = """Using the context provided by the title and the preceding lyrics, create a sentence that can come after it. It should complement the mood, theme, and flow of the song. Be sure to match the given syllables and language. The sentence should seamlessly fit into the lyrics, enhancing the overall narrative and emotional impact.
+ending = "Suggestion:"
+frame_prompt = """Suggest a single line of Korean lyric that matches with given syllables,lyrics, and title.
+Ensure to avoid repeating previous lyrics. Focus on creative and original expression.
+Match the length of the sentence to the syllables I provide as closely as possible.
+For example, if Syllables: 7 given, you should write a 6~8 letter korean sentence.
+Your answer should feel like soft, trendy K-pop lyrics without any profanity.
+Your answer should be short, and only composed with a single sentence.
+Answer with a single line of lyrics you created, and nothing else.
 
-Ensure you count the syllables to match exactly and avoid repeating specific words from the provided lyrics. Focus on creative and original expression.
-
-Create a giben language sentence.
-Count the syllables to ensure it matches exactly.
-If it doesn't match, revise and count again.
-Ensure the sentence does not repeat specific words from the provided lyrics.
-Check that the sentence fits the mood, theme, and flow of the song.
-
-1. Here's an English example:
-
-"It's me James"
-Let's count the syllables:
-
-It's (1)
-me (1)
-James (1)
-Total: 1 + 1 + 1 = 3
-
-Wrong... I will find a new sentence that matches the syllables.
-
-"Heartbeats racing through the night"
-
-Let's count the syllables:
-
-Heartbeats (2)
-racing (2)
-through (1)
-the (1)
-night (1)
-Total: 2 + 2 + 1 + 1 + 1 = 7
-
-Correct! This is my suggestion.
-"Heartbeats racing through the night"
-
-2. Here's a Korean example:
-
-"심장이 마구 뛰어"
-
-Let's count the syllables:
-
-심장이 (3)
-마구 (2)
-뛰어 (2)
-Total: 3 + 2 + 2 = 7
-
-Correct! This is my suggestion.
-"심장이 마구 뛰어"
-
-3. Here's a Korean with English example:
-
-"날아가 fly high"
-Let's count the syllables:
-
-날아가 (3)
-fly (1)
-high (1)
-Total: 3 + 1 + 1 = 5
-
-Wrong... I will find a new sentence that matches the syllables.
-
-"내 심장 자꾸 popping"
-Let's count the syllables:
-
-내 (1)
-심장 (2)
-자꾸 (2)
-popping (2)
-Total: 1 + 2 + 2 + 2 = 7
-
-Correct! This is my suggestion.
-"내 심장 자꾸 popping"
-
-Here
-
-Do it for this
+Here,
 Title: {title} 
-Lyrics: {lyric}
 Syllables: {syllables}
-Language: {language}
+Previous Lyrics: {lyric}
+
+Your korean lyric that should be added to the previous lyrics:
 """
 
 languages = ["Korean", "English", "Korean with English"]
@@ -220,11 +154,6 @@ def save_data(data, output_file):
         for line in data:
             file.write(f"{str(line)}\n")
 
-def update_language(current_language):
-    if random.random() < 0.5:
-        return current_language
-    else:
-        return random.choice(languages)
 
 def generate_kr_lyrics_data(infile, trainfile, testfile):
     df = pd.read_csv(infile, usecols=['title', 'lyric', 'year'])
@@ -252,7 +181,7 @@ def generate_kr_lyrics_data(infile, trainfile, testfile):
                 syllable = count_syllables(line)
                 if syllable:
                     language = identify_language(line)
-                    prompt = frame_prompt.format(title=title, lyric=completed_lyric, syllables=syllable, language=language)
+                    prompt = frame_prompt.format(title=title, lyric=completed_lyric, syllables=syllable)
                     train_outfile.write(json.dumps({"messages": [{"role": "user", "content": prompt}, {"role": "system", "content": line}]}) + "\n")
                     completed_lyric += line + '\n'
         
